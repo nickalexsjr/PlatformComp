@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Fee Comparator V6</title>
+    <!-- Add html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --dark-bg: #121212;
+            --dark-surface: #1e1e1e;
+            --dark-surface-2: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #333333;
+            --header-bg: #232323;
+            --accent-color: #38bdf8;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --error-color: #f87171;
+            --calculated-bg: #1a3045;
+            --calculated-color: #38bdf8;
+            --current-platform-color: #34d399;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: var(--dark-surface);
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            min-height: 100vh;
+            position: relative; /* For absolute positioning of the download button */
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-container h1 {
+            margin: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .download-btn {
+            background-color: var(--success-color);
+            color: #121212;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .download-btn:hover {
+            background-color: #3cbc70;
+            transform: translateY(-2px);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-top: 0;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .instruction {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .step-container {
+            background-color: var(--dark-surface-2);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .step-number {
+            background-color: var(--primary-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--dark-surface);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--dark-surface-2);
+        }
+
+        .input-field {
+            background-color: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            width: 100%;
+            color: var(--text-primary);
+            border-radius: 4px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        select.input-field {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b0b0b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 30px;
+        }
+
+        .calculated {
+            background-color: var(--calculated-bg);
+            color: var(--calculated-color);
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            display: inline-block;
+            width: 100%;
+            text-align: right;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .result-row {
+            font-weight: bold;
+        }
+
+        .result-row td {
+            background-color: var(--header-bg);
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            border-top: 2px solid var(--primary-color);
+            padding-top: 1.5rem;
+        }
+
+        .results-card {
+            background-color: var(--dark-surface-2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .scrollable-table {
+            overflow-x: auto;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .fee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .fee-card {
+            background-color: var(--dark-surface-2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .fee-card.current-platform {
+            border-top: 4px solid var(--current-platform-color);
+            border-left: 2px solid var(--current-platform-color);
+            border-right: 2px solid var(--current-platform-color);
+            border-bottom: 2px solid var(--current-platform-color);
+        }
+
+        .fee-card.current-platform h3 {
+            color: var(--current-platform-color);
+        }
+
+        .fee-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .fee-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .fee-item.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .fee-label {
+            color: var(--text-secondary);
+        }
+
+        .fee-value {
+            font-weight: bold;
+        }
+
+        .account-summary {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            background-color: var(--header-bg);
+        }
+
+        .account-summary-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .account-detail {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .account-detail span:last-child {
+            color: var(--text-primary);
+        }
+
+        .percentage:after {
+            content: '%';
+        }
+
+        .currency:before {
+            content: '$';
+        }
+
+        .toggle-container {
+            margin: 1.5rem 0;
+        }
+
+        .toggle-button, .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .toggle-button:hover, .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-primary {
+            background-color: rgba(99, 102, 241, 0.2);
+            color: var(--primary-color);
+        }
+
+        .badge-success {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: var(--success-color);
+        }
+
+        .badge-warning {
+            background-color: rgba(250, 204, 21, 0.2);
+            color: var(--warning-color);
+        }
+
+        .fee-type-container {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .fee-type-label {
+            margin-right: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .current-badge {
+            background-color: var(--current-platform-color);
+            color: #121212;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        /* PDF specific styles */
+        @media print {
+            body, .container {
+                background-color: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .container {
+                padding: 5mm !important;
+            }
+            
+            .header-container {
+                margin-bottom: 5mm !important;
+            }
+            
+            .header-container h1 {
+                font-size: 18pt !important;
+                margin: 0 !important;
+            }
+            
+            .instruction, .step-container, .download-btn, .toggle-button, .btn {
+                display: none !important;
+            }
+            
+            .text-primary { color: #1a1a1a !important; }
+            .text-secondary { color: #4a4a4a !important; }
+            
+            .fee-item, .account-detail {
+                color: #333 !important;
+            }
+            
+            .calculated {
+                background-color: #e9f5ff !important;
+                color: #0077cc !important;
+            }
+
+            .results-section {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+                border-top: none !important;
+            }
+            
+            .results-section h2 {
+                font-size: 14pt !important;
+                margin-top: 0 !important;
+                margin-bottom: 5mm !important;
+            }
+
+            .fee-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5mm;
+                font-size: 8pt !important;
+            }
+
+            .fee-card {
+                padding: 3mm !important;
+                margin-bottom: 0 !important;
+                border-radius: 3mm !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                box-shadow: none !important;
+                border: 1pt solid #ccc !important;
+            }
+            
+            .fee-card.current-platform {
+                border: 1pt solid #34d399 !important;
+            }
+
+            .fee-card h3 {
+                font-size: 10pt !important;
+                margin: 0 0 2mm 0 !important;
+            }
+
+            .account-summary {
+                padding: 2mm !important;
+                margin-bottom: 2mm !important;
+                background-color: #f5f5f5 !important;
+                border-radius: 2mm !important;
+            }
+
+            .fee-item {
+                padding-bottom: 1mm !important;
+                margin-bottom: 1mm !important;
+                border-bottom: 0.5pt solid #ddd !important;
+            }
+
+            .account-detail {
+                font-size: 7pt !important;
+                margin-bottom: 0.5mm !important;
+            }
+
+            .account-summary-title {
+                font-size: 8pt !important;
+                margin-bottom: 1mm !important;
+                font-weight: bold !important;
+            }
+
+            .note {
+                font-size: 7pt !important;
+                margin-top: 5mm !important;
+                padding-top: 2mm !important;
+                border-top: 0.5pt solid #ddd !important;
+            }
+
+            .note p {
+                margin: 1mm 0 !important;
+            }
+            
+            .current-badge {
+                font-size: 7pt !important;
+                padding: 1mm 2mm !important;
+            }
+            
+            /* Hide most account details in PDF to save space */
+            .account-summary {
+                display: none !important;
+            }
+            
+            /* But keep the total balance summary */
+            .account-summary:first-of-type {
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .fee-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="content-to-pdf">
+        <div class="header-container">
+            <h1>Platform Fee Comparison</h1>
+            <button id="download-pdf" class="download-btn">
+                <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download as PDF
+            </button>
+        </div>
+        <p class="instruction">Complete each step to compare platform fees across different products</p>
+
+        <div class="step-container" id="step1">
+            <div class="step-title">
+                <div class="step-number">1</div>
+                <div class="step-label">Select Number of Accounts</div>
+            </div>
+            <div class="grid-container">
+                <div class="input-group">
+                    <label for="idps-account-count">Number of IDPS Accounts</label>
+                    <select id="idps-account-count" class="input-field" onchange="updateAccountsVisibility()">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="super-account-count">Number of Super/Pension Accounts</label>
+                    <select id="super-account-count" class="input-field" onchange="updateAccountsVisibility()">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container" id="step2">
+            <div class="step-title">
+                <div class="step-number">2</div>
+                <div class="step-label">Enter Account Balances</div>
+            </div>
+            
+            <div class="toggle-container">
+                <button id="toggle-current-platform" class="toggle-button" onclick="toggleCurrentPlatform()">
+                    Set Current Platform Details
+                </button>
+            </div>
+            
+            <div id="current-platform-container" class="hidden">
+                <h3>Your Current Platform Details</h3>
+                <div class="input-group">
+                    <label for="current-platform-name">Current Platform Name</label>
+                    <input type="text" id="current-platform-name" class="input-field" value="Other Current Platform" onchange="calculate()">
+                </div>
+                <div class="grid-container">
+                    <div class="input-group">
+                        <label for="current-admin-fee-input">Current Admin Fee ($)</label>
+                        <input type="number" id="current-admin-fee-input" class="input-field" value="200" onchange="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="current-trustee-fee-input">Current Trustee Fee ($)</label>
+                        <input type="number" id="current-trustee-fee-input" class="input-field" value="50" onchange="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="current-orfr-fee-input">Current ORFR Fee ($)</label>
+                        <input type="number" id="current-orfr-fee-input" class="input-field" value="20" onchange="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="current-expense-fee-input">Current Expense Recovery Fee ($)</label>
+                        <input type="number" id="current-expense-fee-input" class="input-field" value="30" onchange="calculate()">
+                    </div>
+                </div>
+            </div>
+            
+            <h3>IDPS Accounts</h3>
+            <div class="scrollable-table">
+                <table id="idps-accounts-table">
+                    <thead>
+                        <tr>
+                            <th>Account</th>
+                            <th>Total Account Balance</th>
+                            <th>Cash Balance</th>
+                            <th>Invested Balance</th>
+                            <th>Current Platform</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- IDPS accounts will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Super/Pension Accounts</h3>
+            <div class="scrollable-table">
+                <table id="super-accounts-table">
+                    <thead>
+                        <tr>
+                            <th>Account</th>
+                            <th>Total Account Balance</th>
+                            <th>Cash Balance</th>
+                            <th>Invested Balance</th>
+                            <th>Current Platform</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Super accounts will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="step-container" id="step3">
+            <div class="step-title">
+                <div class="step-number">3</div>
+                <div class="step-label">Investment Fees (Optional)</div>
+            </div>
+            <div class="toggle-container">
+                <button id="toggle-investment-fees" class="toggle-button" onclick="toggleInvestmentFees()">
+                    Show Investment Fees
+                </button>
+            </div>
+            <div id="investment-fees-container" class="hidden">
+                <div class="grid-container">
+                    <div class="input-group">
+                        <label for="current-investment-fee">Current Investment Fees</label>
+                        <input type="number" id="current-investment-fee" class="input-field" value="0" onchange="calculate()">
+                        <div class="fee-type-container">
+                            <span class="fee-type-label">Fee Type:</span>
+                            <select id="current-investment-fee-type" class="input-field" onchange="calculate()">
+                                <option value="fixed">Fixed Amount ($)</option>
+                                <option value="percentage">Percentage (%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="proposed-investment-fee">Proposed Investment Fees</label>
+                        <input type="number" id="proposed-investment-fee" class="input-field" value="0" onchange="calculate()">
+                        <div class="fee-type-container">
+                            <span class="fee-type-label">Fee Type:</span>
+                            <select id="proposed-investment-fee-type" class="input-field" onchange="calculate()">
+                                <option value="fixed">Fixed Amount ($)</option>
+                                <option value="percentage">Percentage (%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <h2>Fee Comparison Results</h2>
+            <div id="fee-comparison-container" class="fee-grid">
+                <!-- Fee comparison cards will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <div class="note">
+            <p>* Fee discounts apply for clients who hold multiple Life Focus and Portfolio Solutions eWRAP Super and/or eWRAP Pension accounts. To be eligible for the fee aggregation/discount, the accounts must be registered under the same surname, date of birth, financial adviser and adviser code.</p>
+            <p>* Centric charge a Cash Account fee of up to 0.60% before interest is credit to Centric Cash Accounts. The Cash Account fee is paid out of the cash deposited in the underlying bank accounts Centric maintain and is not separately deducted from individual account balances.</p>
+            <p>* Centric One is only available for Superannuation. Investment accounts are not shown in these calculations.</p>
+        </div>
+    </div>
+
+    <script>
+        // Number formatting function
+        function formatNumber(number) {
+            return new Intl.NumberFormat('en-US', { 
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(number);
+        }
+
+        // PDF export function
+        function downloadPDF() {
+            // Show loading indication
+            const downloadBtn = document.getElementById('download-pdf');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = 'Generating PDF...';
+            downloadBtn.disabled = true;
+
+            // Get the element to convert
+            const element = document.getElementById('content-to-pdf');
+            
+            // Create a temporary clone for PDF
+            const tempElement = document.createElement('div');
+            tempElement.style.width = '210mm';
+            tempElement.style.padding = '10mm';
+            
+            // Copy only the title and results
+            const titleClone = element.querySelector('h1').cloneNode(true);
+            tempElement.appendChild(titleClone);
+            
+            const resultsSection = element.querySelector('.results-section').cloneNode(true);
+            tempElement.appendChild(resultsSection);
+            
+            // Copy notes
+            const notesSection = element.querySelector('.note').cloneNode(true);
+            tempElement.appendChild(notesSection);
+            
+            // Define PDF options
+            const options = {
+                margin: [5, 5, 5, 5],
+                filename: 'Platform_Fee_Comparison.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Generate PDF
+            html2pdf()
+                .set(options)
+                .from(tempElement)
+                .save()
+                .then(() => {
+                    // Restore button state
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.disabled = false;
+                });
+        }
+
+        // Initialize the PDF download button
+        document.getElementById('download-pdf').addEventListener('click', downloadPDF);
+
+        // Global data structures
+        const productFees = {
+            "Centric IDPS": {
+                adminFee: function(totalBalance) {
+                    return 450; // Fixed $450 fee for IDPS
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A for IDPS
+                },
+                orfrFee: function(totalBalance) {
+                    return 0; // N/A for IDPS
+                },
+                expenseFee: function(totalBalance) {
+                    return 0; // No expense recovery fees for IDPS Centric
+                },
+                cashRateInvestment: 0.043,
+                cashRateSuper: 0,
+                color: "#6366f1"
+            },
+            "Centric Choice": {
+                adminFee: function(totalBalance) {
+                    return 528; // Fixed $528 admin fee
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // No trustee fee
+                },
+                orfrFee: function(totalBalance) {
+                    return totalBalance * 0.00025; // 0.025% of total balance
+                },
+                expenseFee: function(totalBalance) {
+                    return 132; // Fixed $132 expense recovery fee
+                },
+                cashRateInvestment: 0,
+                cashRateSuper: 0.042,
+                color: "#6366f1"
+            },
+            "Centric One": {
+                adminFee: function(totalBalance) {
+                    return totalBalance * 0.002833; // 0.2833% of account balance
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // No trustee fee
+                },
+                orfrFee: function(totalBalance) {
+                    return 0; // No ORFR fee
+                },
+                expenseFee: function(totalBalance) {
+                    return 0; // No expense recovery fee
+                },
+                cashRateInvestment: 0,
+                cashRateSuper: 0.042,
+                color: "#4f46e5"
+            },
+            "BT Panorama (Compact Menu)": {
+                adminFee: function(totalBalance) {
+                    if (totalBalance > 1000000) {
+                        return 1500; // Flat fee for balances over $1M
+                    } else {
+                        let baseFee = 0;
+                        if (totalBalance <= 100000) {
+                            baseFee = totalBalance * 0.0015;
+                        } else if (totalBalance <= 250000) {
+                            baseFee = 100000 * 0.0015 + (totalBalance - 100000) * 0.0013;
+                        } else if (totalBalance <= 500000) {
+                            baseFee = 100000 * 0.0015 + 150000 * 0.0013 + (totalBalance - 250000) * 0.0008;
+                        } else if (totalBalance <= 750000) {
+                            baseFee = 100000 * 0.0015 + 150000 * 0.0013 + 250000 * 0.0008 + (totalBalance - 500000) * 0.0005;
+                        } else {
+                            baseFee = 100000 * 0.0015 + 150000 * 0.0013 + 250000 * 0.0008 + 250000 * 0.0005 + (totalBalance - 750000) * 0.0002;
+                        }
+                        return baseFee;
+                    }
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                orfrFee: function(totalBalance) {
+                    return totalBalance * 0.00005;
+                },
+                expenseFee: function(totalBalance) {
+                    return totalBalance * 0.0003;
+                },
+                cashRateInvestment: 0.0335,
+                cashRateSuper: 0.0335,
+                color: "#38bdf8"
+            },
+            "BT Panorama (Full Menu)": {
+                adminFee: function(totalBalance) {
+                    if (totalBalance > 1000000) {
+                        return 1500; // Flat fee for balances over $1M
+                    } else {
+                        let baseFee = 0;
+                        if (totalBalance <= 100000) {
+                            baseFee = totalBalance * 0.0020;
+                        } else if (totalBalance <= 250000) {
+                            baseFee = 100000 * 0.0020 + (totalBalance - 100000) * 0.0017;
+                        } else if (totalBalance <= 500000) {
+                            baseFee = 100000 * 0.0020 + 150000 * 0.0017 + (totalBalance - 250000) * 0.0012;
+                        } else if (totalBalance <= 750000) {
+                            baseFee = 100000 * 0.0020 + 150000 * 0.0017 + 250000 * 0.0012 + (totalBalance - 500000) * 0.0007;
+                        } else {
+                            baseFee = 100000 * 0.0020 + 150000 * 0.0017 + 250000 * 0.0012 + 250000 * 0.0007 + (totalBalance - 750000) * 0.0003;
+                        }
+                        return baseFee;
+                    }
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                orfrFee: function(totalBalance) {
+                    return totalBalance * 0.00005;
+                },
+                expenseFee: function(totalBalance) {
+                    return totalBalance * 0.0003;
+                },
+                cashRateInvestment: 0.0335,
+                cashRateSuper: 0.0335,
+                color: "#0ea5e9"
+            },
+            "LifeFocus Private": {
+                adminFee: function(totalBalance) {
+                    let fee = 0;
+                    if (totalBalance <= 100000) {
+                        fee += totalBalance * 0.00902;
+                    } else if (totalBalance <= 250000) {
+                        fee += 100000 * 0.00902 + (Math.min(totalBalance, 250000) - 100000) * 0.00779;
+                    } else if (totalBalance <= 500000) {
+                        fee += 100000 * 0.00902 + 150000 * 0.00779 + (Math.min(totalBalance, 500000) - 250000) * 0.00574;
+                    } else if (totalBalance <= 1000000) {
+                        fee += 100000 * 0.00902 + 150000 * 0.00779 + 250000 * 0.00574 + (Math.min(totalBalance, 1000000) - 500000) * 0.00369;
+                    } else if (totalBalance <= 3000000) {
+                        fee += 100000 * 0.00902 + 150000 * 0.00779 + 250000 * 0.00574 + 500000 * 0.00369 + (Math.min(totalBalance, 3000000) - 1000000) * 0.00164;
+                    } else {
+                        fee += 100000 * 0.00902 + 150000 * 0.00779 + 250000 * 0.00574 + 500000 * 0.00369 + 2000000 * 0.00164 + (totalBalance - 3000000) * 0.00082;
+                    }
+                    return fee;
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                orfrFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                expenseFee: function(totalBalance) {
+                    return totalBalance * 0.0001;
+                },
+                cashRateInvestment: 0.031,
+                cashRateSuper: 0.0335,
+                color: "#4ade80"
+            },
+            "LifeFocus Wholesale": {
+                adminFee: function(totalBalance) {
+                    return totalBalance * 0.002563;
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                orfrFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                expenseFee: function(totalBalance) {
+                    return totalBalance * 0.0001;
+                },
+                cashRateInvestment: 0.031,
+                cashRateSuper: 0.0335,
+                color: "#34d399"
+            },
+            "Portfolio Solutions": {
+                adminFee: function(totalBalance) {
+                    if (totalBalance >= 1000000) {
+                        return 2125; // Flat fee for balances over $1M
+                    }
+                    
+                    let fee = 0;
+                    if (totalBalance <= 84000) {
+                        fee += totalBalance * 0.008929;
+                    } else if (totalBalance <= 300000) {
+                        fee += 84000 * 0.008929 + (Math.min(totalBalance, 300000) - 84000) * 0.00625;
+                    } else if (totalBalance <= 500000) {
+                        fee += 84000 * 0.008929 + 216000 * 0.00625 + (Math.min(totalBalance, 500000) - 300000) * 0.00375;
+                    } else if (totalBalance <= 1000000) {
+                        fee += 84000 * 0.008929 + 216000 * 0.00625 + 200000 * 0.00375 + (Math.min(totalBalance, 1000000) - 500000) * 0.00225;
+                    } else if (totalBalance <= 3000000) {
+                        fee += 84000 * 0.008929 + 216000 * 0.00625 + 200000 * 0.00375 + 500000 * 0.00225 + (Math.min(totalBalance, 3000000) - 1000000) * 0.00075;
+                    } else {
+                        fee += 84000 * 0.008929 + 216000 * 0.00625 + 200000 * 0.00375 + 500000 * 0.00225 + 2000000 * 0.00075 + (totalBalance - 3000000) * 0.0005;
+                    }
+                    return fee;
+                },
+                trusteeFee: function(totalBalance) {
+                    return 0; // N/A
+                },
+                orfrFee: function(totalBalance) {
+                    return totalBalance * 0.00003;
+                },
+                expenseFee: function(totalBalance) {
+                    return totalBalance * 0.0001;
+                },
+                cashRateInvestment: 0.031,
+                cashRateSuper: 0.0335,
+                color: "#facc15"
+            }
+        };
+
+        // Initialize
+        let showInvestmentFees = false;
+        let showCurrentPlatform = false;
+        let accountDetails = {
+            idps: [],
+            super: []
+        };
+
+        // Toggle current platform section
+        function toggleCurrentPlatform() {
+            showCurrentPlatform = !showCurrentPlatform;
+            document.getElementById('current-platform-container').classList.toggle('hidden', !showCurrentPlatform);
+            document.getElementById('toggle-current-platform').textContent = showCurrentPlatform 
+                ? 'Hide Current Platform Details' 
+                : 'Set Current Platform Details';
+            calculate();
+        }
+
+        // Toggle investment fees visibility
+        function toggleInvestmentFees() {
+            showInvestmentFees = !showInvestmentFees;
+            
+            document.getElementById('investment-fees-container').classList.toggle('hidden', !showInvestmentFees);
+            document.getElementById('toggle-investment-fees').textContent = showInvestmentFees ? 'Hide Investment Fees' : 'Show Investment Fees';
+            
+            calculate();
+        }
+
+        // Calculate investment fees based on type (fixed or percentage)
+        function calculateInvestmentFee(feeValue, feeType, totalInvestedBalance) {
+            if (feeType === 'fixed') {
+                return parseFloat(feeValue) || 0;
+            } else { // percentage
+                return (parseFloat(feeValue) / 100) * totalInvestedBalance;
+            }
+        }
+
+        // Update accounts visibility based on selections
+        function updateAccountsVisibility() {
+            const idpsCount = parseInt(document.getElementById('idps-account-count').value);
+            const superCount = parseInt(document.getElementById('super-account-count').value);
+            
+            // Clear tables
+            const idpsTableBody = document.querySelector('#idps-accounts-table tbody');
+            const superTableBody = document.querySelector('#super-accounts-table tbody');
+            
+            idpsTableBody.innerHTML = '';
+            superTableBody.innerHTML = '';
+            
+            // Reset account details
+            accountDetails = {
+                idps: Array(idpsCount).fill().map(() => ({ balance: 0, cash: 0, invested: 0, platform: '' })),
+                super: Array(superCount).fill().map(() => ({ balance: 0, cash: 0, invested: 0, platform: '' }))
+            };
+            
+            // Add IDPS accounts
+            for (let i = 1; i <= idpsCount; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>IDPS Account ${i}</td>
+                    <td><input type="number" id="idps-balance-${i}" class="input-field" value="0" onchange="updateAccountDetails('idps', ${i-1}, 'balance', this.value)"></td>
+                    <td><input type="number" id="idps-cash-${i}" class="input-field" value="0" onchange="updateAccountDetails('idps', ${i-1}, 'cash', this.value)"></td>
+                    <td><div class="calculated" id="idps-invested-${i}">0.00</div></td>
+                    <td>
+                        <select id="idps-platform-${i}" class="input-field" onchange="updateAccountDetails('idps', ${i-1}, 'platform', this.value)">
+                            <option value="">Select Current Platform</option>
+                            <option value="Centric IDPS">Centric IDPS</option>
+                            <option value="BT Panorama (Compact Menu)">BT Panorama (Compact Menu)</option>
+                            <option value="BT Panorama (Full Menu)">BT Panorama (Full Menu)</option>
+                            <option value="LifeFocus Private">LifeFocus Private</option>
+                            <option value="LifeFocus Wholesale">LifeFocus Wholesale</option>
+                            <option value="Portfolio Solutions">Portfolio Solutions</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </td>
+                `;
+                idpsTableBody.appendChild(row);
+            }
+            
+            // Add Super accounts
+            for (let i = 1; i <= superCount; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Super/Pension Account ${i}</td>
+                    <td><input type="number" id="super-balance-${i}" class="input-field" value="0" onchange="updateAccountDetails('super', ${i-1}, 'balance', this.value)"></td>
+                    <td><input type="number" id="super-cash-${i}" class="input-field" value="0" onchange="updateAccountDetails('super', ${i-1}, 'cash', this.value)"></td>
+                    <td><div class="calculated" id="super-invested-${i}">0.00</div></td>
+                    <td>
+                        <select id="super-platform-${i}" class="input-field" onchange="updateAccountDetails('super', ${i-1}, 'platform', this.value)">
+                            <option value="">Select Current Platform</option>
+                            <option value="Centric Choice">Centric Choice</option>
+                            <option value="Centric One">Centric One</option>
+                            <option value="BT Panorama (Compact Menu)">BT Panorama (Compact Menu)</option>
+                            <option value="BT Panorama (Full Menu)">BT Panorama (Full Menu)</option>
+                            <option value="LifeFocus Private">LifeFocus Private</option>
+                            <option value="LifeFocus Wholesale">LifeFocus Wholesale</option>
+                            <option value="Portfolio Solutions">Portfolio Solutions</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </td>
+                `;
+                superTableBody.appendChild(row);
+            }
+            
+            calculate();
+        }
+
+        // Update account details and recalculate
+        function updateAccountDetails(type, index, field, value) {
+            if (field === 'balance' || field === 'cash') {
+                value = parseFloat(value) || 0;
+            }
+            
+            accountDetails[type][index][field] = value;
+            
+            // Update invested amount
+            if (field === 'balance' || field === 'cash') {
+                const invested = accountDetails[type][index].balance - accountDetails[type][index].cash;
+                accountDetails[type][index].invested = invested;
+                
+                // Update the display with formatted number
+                const i = index + 1;
+                document.getElementById(`${type}-invested-${i}`).textContent = formatNumber(invested);
+            }
+            
+            calculate();
+        }
+
+        // Create fee comparison card for a platform
+        function createFeeComparisonCard(platform, totalBalance, accounts, isCurrentPlatform = false) {
+            const color = isCurrentPlatform ? "#f87171" : (productFees[platform]?.color || "#6366f1");
+            const platformId = platform.replace(/\s+/g, '-').replace(/\(/g, '').replace(/\)/g, '').toLowerCase();
+            
+            let adminFee = 0;
+            let trusteeFee = 0;
+            let orfrFee = 0;
+            let expenseFee = 0;
+            
+            // Calculate total invested balance
+            let totalInvestedBalance = 0;
+            accounts.forEach(account => {
+                totalInvestedBalance += account.invested;
+            });
+            
+            // For current platform, use the input values
+            if (isCurrentPlatform) {
+                adminFee = parseFloat(document.getElementById('current-admin-fee-input').value || 0);
+                trusteeFee = parseFloat(document.getElementById('current-trustee-fee-input').value || 0);
+                orfrFee = parseFloat(document.getElementById('current-orfr-fee-input').value || 0);
+                expenseFee = parseFloat(document.getElementById('current-expense-fee-input').value || 0);
+            } 
+            // For other platforms, calculate based on balances
+            else if (productFees[platform]) {
+                // Calculate total balances for IDPS and Super accounts
+                let idpsBalance = 0;
+                let superBalance = 0;
+                
+                accounts.forEach(account => {
+                    if (account.type === 'idps') {
+                        idpsBalance += account.balance;
+                    } else if (account.type === 'super') {
+                        superBalance += account.balance;
+                    }
+                });
+                
+                // Calculate fees
+                adminFee = productFees[platform].adminFee(totalBalance);
+                trusteeFee = productFees[platform].trusteeFee(superBalance);
+                orfrFee = productFees[platform].orfrFee(superBalance);
+                expenseFee = productFees[platform].expenseFee(totalBalance);
+            }
+            
+            // Calculate investment fees
+            let investmentFee = 0;
+            if (showInvestmentFees) {
+                // For current platform card OR for platforms that are current for any account, use current investment fees
+                if (isCurrentPlatform || isAnyAccountCurrentPlatform) {
+                    const currentInvestmentFeeValue = document.getElementById('current-investment-fee').value;
+                    const currentInvestmentFeeType = document.getElementById('current-investment-fee-type').value;
+                    investmentFee = calculateInvestmentFee(currentInvestmentFeeValue, currentInvestmentFeeType, totalInvestedBalance);
+                } else {
+                    const proposedInvestmentFeeValue = document.getElementById('proposed-investment-fee').value;
+                    const proposedInvestmentFeeType = document.getElementById('proposed-investment-fee-type').value;
+                    investmentFee = calculateInvestmentFee(proposedInvestmentFeeValue, proposedInvestmentFeeType, totalInvestedBalance);
+                }
+            }
+            
+            const totalFee = adminFee + trusteeFee + orfrFee + expenseFee;
+            const totalAllFees = totalFee + investmentFee;
+            
+            let accountSummaryHTML = '';
+            if (accounts.length > 0) {
+                accounts.forEach(account => {
+                    const accountName = account.type === 'idps' ? `IDPS Account ${account.index + 1}` : `Super/Pension Account ${account.index + 1}`;
+                    accountSummaryHTML += `
+                        <div class="account-summary">
+                            <div class="account-summary-title">${accountName}</div>
+                            <div class="account-detail">
+                                <span>Total Balance:</span> 
+                                <span class="currency">${formatNumber(account.balance)}</span>
+                            </div>
+                            <div class="account-detail">
+                                <span>Cash Balance:</span> 
+                                <span class="currency">${formatNumber(account.cash)}</span>
+                            </div>
+                            <div class="account-detail">
+                                <span>Invested Balance:</span> 
+                                <span class="currency">${formatNumber(account.invested)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Check if any account is using this platform as current
+            const isAnyAccountCurrentPlatform = accounts.some(account => account.platform === platform);
+            const cardClass = isAnyAccountCurrentPlatform ? 'fee-card current-platform' : 'fee-card';
+            
+            const card = document.createElement('div');
+            card.className = cardClass;
+            if (!isAnyAccountCurrentPlatform) {
+                card.style.borderTopColor = color;
+            }
+            
+            card.innerHTML = `
+                <h3>${platform} ${isAnyAccountCurrentPlatform ? '<span class="current-badge">Current</span>' : ''}</h3>
+                <div class="account-summary">
+                    <div class="account-summary-title">Total Combined Balance</div>
+                    <div class="account-detail">
+                        <span>Total Balance:</span> 
+                        <span class="currency">${formatNumber(totalBalance)}</span>
+                    </div>
+                </div>
+                ${accountSummaryHTML}
+                <div class="fee-item">
+                    <span class="fee-label">Admin Fee</span>
+                    <span class="fee-value currency">${formatNumber(adminFee)}</span>
+                </div>
+                <div class="fee-item ${isCurrentPlatform || ['Centric Choice', 'Centric IDPS'].includes(platform) ? '' : 'hidden'}">
+                    <span class="fee-label">Trustee Fee</span>
+                    <span class="fee-value ${isCurrentPlatform || ['Centric Choice', 'Centric IDPS'].includes(platform) ? 'currency' : ''}">
+                        ${isCurrentPlatform || ['Centric Choice', 'Centric IDPS'].includes(platform) ? formatNumber(trusteeFee) : 'N/A'}
+                    </span>
+                </div>
+                <div class="fee-item ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'Portfolio Solutions'].includes(platform) ? '' : 'hidden'}">
+                    <span class="fee-label">ORFR Fee</span>
+                    <span class="fee-value ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'Portfolio Solutions'].includes(platform) ? 'currency' : ''}">
+                        ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'Portfolio Solutions'].includes(platform) ? formatNumber(orfrFee) : 'N/A'}
+                    </span>
+                </div>
+                <div class="fee-item ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'LifeFocus Private', 'LifeFocus Wholesale', 'Portfolio Solutions'].includes(platform) ? '' : 'hidden'}">
+                    <span class="fee-label">Expense Recovery Fee</span>
+                    <span class="fee-value ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'LifeFocus Private', 'LifeFocus Wholesale', 'Portfolio Solutions'].includes(platform) ? 'currency' : ''}">
+                        ${isCurrentPlatform || ['Centric Choice', 'BT Panorama (Compact Menu)', 'BT Panorama (Full Menu)', 'LifeFocus Private', 'LifeFocus Wholesale', 'Portfolio Solutions'].includes(platform) ? formatNumber(expenseFee) : 'N/A'}
+                    </span>
+                </div>
+                <div class="fee-item total">
+                    <span class="fee-label">Total Platform Fees</span>
+                    <span class="fee-value currency">${formatNumber(totalFee)}</span>
+                </div>
+                ${showInvestmentFees ? `
+                <div class="fee-item">
+                    <span class="fee-label">${isCurrentPlatform || isAnyAccountCurrentPlatform ? 'Current' : 'Proposed'} Investment Fees</span>
+                    <span class="fee-value currency">${formatNumber(investmentFee)}</span>
+                </div>
+                <div class="fee-item total">
+                    <span class="fee-label">Total All Fees</span>
+                    <span class="fee-value currency">${formatNumber(totalAllFees)}</span>
+                </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+
+        // Main calculation function
+        function calculate() {
+            // Get total balances and prepare account data
+            let totalBalance = 0;
+            let formattedAccounts = [];
+            
+            // Process IDPS accounts
+            accountDetails.idps.forEach((account, index) => {
+                if (account.balance > 0) {
+                    totalBalance += account.balance;
+                    formattedAccounts.push({
+                        type: 'idps',
+                        index: index,
+                        balance: account.balance,
+                        cash: account.cash,
+                        invested: account.invested,
+                        platform: account.platform
+                    });
+                }
+            });
+            
+            // Process Super accounts
+            accountDetails.super.forEach((account, index) => {
+                if (account.balance > 0) {
+                    totalBalance += account.balance;
+                    formattedAccounts.push({
+                        type: 'super',
+                        index: index,
+                        balance: account.balance,
+                        cash: account.cash,
+                        invested: account.invested,
+                        platform: account.platform
+                    });
+                }
+            });
+            
+            // Clear fee comparison container
+            const feeComparisonContainer = document.getElementById('fee-comparison-container');
+            feeComparisonContainer.innerHTML = '';
+            
+            // Skip if no accounts or balances
+            if (formattedAccounts.length === 0 || totalBalance === 0) {
+                feeComparisonContainer.innerHTML = '<p>Please add account details to see fee comparisons.</p>';
+                return;
+            }
+            
+            // Add current platform card if enabled
+            if (showCurrentPlatform) {
+                const currentPlatformName = document.getElementById('current-platform-name').value || 'Other Current Platform';
+                feeComparisonContainer.appendChild(
+                    createFeeComparisonCard(currentPlatformName, totalBalance, formattedAccounts, true)
+                );
+            }
+            
+            // Get list of available platforms based on account types
+            let availablePlatforms = [];
+            
+            // Check if there are IDPS accounts
+            const hasIdps = accountDetails.idps.some(account => account.balance > 0);
+            
+            // Check if there are Super accounts
+            const hasSuper = accountDetails.super.some(account => account.balance > 0);
+            
+            // Add platforms based on account types
+            if (hasIdps) {
+                availablePlatforms.push("Centric IDPS");
+                availablePlatforms.push("BT Panorama (Compact Menu)");
+                availablePlatforms.push("BT Panorama (Full Menu)");
+                availablePlatforms.push("LifeFocus Private");
+                availablePlatforms.push("LifeFocus Wholesale");
+                availablePlatforms.push("Portfolio Solutions");
+            }
+            
+            if (hasSuper) {
+                // Add Super platforms if not already in the list
+                ["Centric Choice", "Centric One", "BT Panorama (Compact Menu)", "BT Panorama (Full Menu)", "LifeFocus Private", "LifeFocus Wholesale", "Portfolio Solutions"].forEach(platform => {
+                    if (!availablePlatforms.includes(platform)) {
+                        availablePlatforms.push(platform);
+                    }
+                });
+            }
+            
+            // Only Centric One for super accounts
+            if (!hasSuper && availablePlatforms.includes("Centric One")) {
+                availablePlatforms = availablePlatforms.filter(platform => platform !== "Centric One");
+            }
+            
+            // Add cards for each applicable platform
+            availablePlatforms.forEach(platform => {
+                feeComparisonContainer.appendChild(
+                    createFeeComparisonCard(platform, totalBalance, formattedAccounts)
+                );
+            });
+        }
+
+        // Initialize the form when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAccountsVisibility();
+        });
+    </script>
+</body>
+</html>
